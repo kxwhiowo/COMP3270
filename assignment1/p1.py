@@ -1,16 +1,29 @@
-import sys, grader, parse
+import sys, grader, parse, collections
 
 
 def dfs_search(problem):
-    path = ''
-    sequence = ''
+    # print(problem)
+    path = []
     start = problem['start']
     goal = problem['goal']
-
-
-
-    solution = sequence + '\n' + path
-    solution = 'Ar D C\nAr C G'
+    frontier = collections.deque([[start, ]])
+    exploredList = list()
+    while frontier:
+        node = frontier.pop()
+        if node[-1] == goal:
+            path = node
+            break
+        if node[-1] not in exploredList:
+            # print('Explore: ' + node[-1])
+            exploredList.append(node[-1])
+            # print(problem[node[-1]])
+            for child in problem[node[-1]]:
+                if type(child) is tuple:
+                    newNode = [i for i in node]
+                    newNode.append(child[0])
+                    frontier.append(newNode)
+    deli = " "
+    solution = deli.join(exploredList) + '\n' + deli.join(path)
     return solution
 
 
