@@ -1,9 +1,18 @@
 import sys, grader, parse
 
+
 def dfs_search(problem):
-    #Your p1 code here
+    path = ''
+    sequence = ''
+    start = problem['start']
+    goal = problem['goal']
+
+
+
+    solution = sequence + '\n' + path
     solution = 'Ar D C\nAr C G'
     return solution
+
 
 if __name__ == "__main__":
     test_case_id = int(sys.argv[1])
