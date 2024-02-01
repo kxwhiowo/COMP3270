@@ -23,8 +23,12 @@ def read_graph_search_problem(file_path):
 
 
 def read_8queens_search_problem(file_path):
-    # Your p6 code here
-    problem = ''
+
+    problem = [] # a 2D array containing 8 sub lists
+    with open(file_path) as f:
+        lines = f.readlines()
+        for i in lines:
+            problem.append(i.split())
     return problem
 
 
