@@ -24,7 +24,6 @@ def better_board(problem):
             solu[i].append(ori)
     solu1 = [deli.join(solu[j]) for j in range(8)]
     soluFinal = deliChangeLine.join(solu1)
-    print(soluFinal)
     return soluFinal
 
 
