@@ -2,9 +2,10 @@ import sys, parse, grader
 
 
 def checkAttack(position, problem):
+    exploredSet = set()
     for row in range(len(problem)):
         for col in range(8):
-            exploredSet = set()
+
             # check horizontally
             for hori in range(0, 8):
                 if hori != col:
