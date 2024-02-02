@@ -3,29 +3,35 @@ import sys, parse, grader
 
 def checkAttack(position, problem):
     exploredSet = set()
+    count = 0
     row, col = position[0], position[1]
     # check horizontally
     for hori in range(0, 8):
         if hori > col:
             if problem[row][hori] == 'q':
-                if ((row, col), (row, hori)) not in exploredSet and (
-                        (row, hori), (row, col)) not in exploredSet:
-                    exploredSet.add(((row, col), (row, hori)))
+                count += 1
+                exploredSet.add(((row, col), (row, hori)))
     # check diagonally
     for i in range(8):
         for j in range(8):
-            if i <= col:
+            if j <= col:
                 continue
             elif ((i, j) != (row, col)) and ((i + j == row + col) or (i - j == row - col)):
                 if problem[i][j] == 'q':
-                    if ((row, col), (i, j)) not in exploredSet and (
-                            (i, j), (row, col)) not in exploredSet:
-                        exploredSet.add(((row, col), (i, j)))
-    return len(exploredSet)
+                    exploredSet.add(((row, col), (i, j)))
+                    count += 1
+    return count
 
 
-def createNewMap(row, col, problem):
-    newProblem = [i for i in problem]
+def createNewMap(row, col, problem):  # !!!!!!!!
+    newProblem = [[] for i in range(8)]
+    for row1 in newProblem:
+        for col1 in range(8):
+            row1.append([])
+    for a in range(8):
+        for b in range(8):
+            newProblem[a][b] = problem[a][b]
+
     for i in range(8):
         newProblem[i][col] = '.'
     newProblem[row][col] = 'q'
@@ -42,33 +48,55 @@ def findQueens(problem):
 
 
 def checkingAttackWithNewMap(row, col, map):
-    print(map)
     queenList = findQueens(map)
-    attack = checkAttack((row, col), map)
+    attack = 0
+    attack += checkAttack((row, col), map)
     for q in queenList:
         if q[1] != col:
-            attack += checkAttack(q, map)
+            attack += checkAttack((q[0], q[1]), map)
     return attack
+
+
+def getNumberListAndPosition(problem):
+    cost = [[] for i in range(8)]
+    for row in cost:
+        for col in range(8):
+            row.append(0)
+    for row1 in range(8):
+        for col1 in range(8):
+            cost[row1][col1] = checkingAttackWithNewMap(row1, col1, createNewMap(row1, col1, problem))
+    numList = [[] for i in range(8)]
+    lowest = cost[0][0]
+    position = (0, 0)
+    for i in range(8):
+        for j in range(8):
+            numList[i].append(cost[i][j])
+            if cost[i][j] < lowest:
+                lowest = cost[i][j]
+                position = (i, j)
+    return position
 
 
 def number_of_attacks(problem):
     cost = [[] for i in range(8)]
     for row in cost:
         for col in range(8):
-            row.append([])
+            row.append(0)
     for row1 in range(8):
         for col1 in range(8):
             cost[row1][col1] = checkingAttackWithNewMap(row1, col1, createNewMap(row1, col1, problem))
-    print(cost)
-    solution = """18 12 14 13 13 12 14 14
-14 16 13 15 12 14 12 16
-14 12 18 13 15 12 14 14
-15 14 14 17 13 16 13 16
-17 14 17 15 17 14 16 16
-17 17 16 18 15 17 15 17
-18 14 17 15 15 14 17 16
-14 14 13 17 12 14 12 18"""
-    return solution
+    deli = " "
+    deliChangeLine = "\n"
+    solu = [[] for i in range(8)]
+    for i in range(8):
+        for j in range(8):
+            ori = str(cost[i][j])
+            if cost[i][j] < 10:
+                ori = ' ' + ori
+            solu[i].append(ori)
+    solu1 = [deli.join(solu[j]) for j in range(8)]
+    soluFinal = deliChangeLine.join(solu1)
+    return soluFinal
 
 
 if __name__ == "__main__":
