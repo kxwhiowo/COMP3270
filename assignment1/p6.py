@@ -1,16 +1,12 @@
 import sys, parse, grader
 
-'''
-check the attack number at specific posision
-'''
-
 
 def checkAttack(position, problem):
     exploredSet = set()
     row, col = position[0], position[1]
     # check horizontally
     for hori in range(0, 8):
-        if hori != col:
+        if hori > col:
             if problem[row][hori] == 'q':
                 if ((row, col), (row, hori)) not in exploredSet and (
                         (row, hori), (row, col)) not in exploredSet:
@@ -18,12 +14,13 @@ def checkAttack(position, problem):
     # check diagonally
     for i in range(8):
         for j in range(8):
-            if ((i, j) != (row, col)) and ((i + j == row + col) or (i - j == row - col)):
+            if i <= col:
+                continue
+            elif ((i, j) != (row, col)) and ((i + j == row + col) or (i - j == row - col)):
                 if problem[i][j] == 'q':
                     if ((row, col), (i, j)) not in exploredSet and (
                             (i, j), (row, col)) not in exploredSet:
                         exploredSet.add(((row, col), (i, j)))
-
     return len(exploredSet)
 
 
@@ -44,23 +41,13 @@ def findQueens(problem):
     return listOfQueens
 
 
-def checkQueensAttack(listOfQueens, problem):
-    queensAttacks = []
-    for q in listOfQueens:
-        queensAttacks.append(checkAttack(q, problem))
-    return queensAttacks
-
-
-def checkingAttackWithNewMap(map):
+def checkingAttackWithNewMap(row, col, map):
+    print(map)
     queenList = findQueens(map)
-    queenAttackList = checkQueensAttack(queenList, map)
-    attack = 0
-    for i in range(8):
-        for j in range(8):
-            attack += checkAttack((i, j), map)
-            for q in queenAttackList:
-                if q != j:
-                    attack += queenAttackList[q]
+    attack = checkAttack((row, col), map)
+    for q in queenList:
+        if q[1] != col:
+            attack += checkAttack(q, map)
     return attack
 
 
@@ -71,7 +58,7 @@ def number_of_attacks(problem):
             row.append([])
     for row1 in range(8):
         for col1 in range(8):
-            cost[row1][col1] = checkingAttackWithNewMap(createNewMap(row1, col1, problem))
+            cost[row1][col1] = checkingAttackWithNewMap(row1, col1, createNewMap(row1, col1, problem))
     print(cost)
     solution = """18 12 14 13 13 12 14 14
 14 16 13 15 12 14 12 16
