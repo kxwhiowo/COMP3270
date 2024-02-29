@@ -6,7 +6,6 @@ def read_layout_problem(file_path):
         lines = f.readlines()
         for i in lines:
             problem += i
-
     return problem
 
 if __name__ == "__main__":
