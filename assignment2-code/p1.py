@@ -30,17 +30,18 @@ def random_play_single_ghost(problem):
             if winner == 'Pacman':
                 score += PACMAN_WIN_SCORE
             
-            solution += transfer_map_to_solution(world, score, counter, player_now, direction) + '\n'
+            solution += transfer_map_to_solution(world, score, counter, player_now, direction)
             solution += 'WIN: ' + winner
             break
         else:
-            solution += transfer_map_to_solution(world, score, counter, player_now, direction) + '\n'
+            solution += transfer_map_to_solution(world, score, counter, player_now, direction)
             if player_now == 'P':
                 player_now = 'W'
             else:
                 player_now = 'P'
     with open('1.txt', 'wt') as f:
         print(solution, file=f)
+    print(world)
     return solution
 
 def check_available(map, position):
@@ -74,17 +75,23 @@ def make_move(player, direction, map, position, overlap):
             score += EAT_FOOD_SCORE
         elif map[x_next][y_next] == 'W':
             map[x] = map[x][:y] + ' ' + map[x][y + 1:]
+            # for i in map:
+            #     if i[-1] == ' ' or i[-1] == '\n':
+            #         i = i[:-1]
             return score + PACMAN_EATEN_SCORE + PACMAN_MOVING_SCORE, map, overlap
         map[x_next] = map[x_next][:y_next] + player + map[x_next][y_next + 1:]
         map[x] = map[x][:y] + ' ' + map[x][y + 1:]
         #print(map)
+        # for i in map:
+        #         if i[-1] == ' ' or i[-1] == '\n':
+        #             i = i[:-1]
         return score + PACMAN_MOVING_SCORE, map, overlap
     if player == 'W':
         x_next, y_next = choose_next_position(position, direction)
         if map[x_next][y_next] == 'P':
             score += PACMAN_EATEN_SCORE
         if overlap:
-            map[x] = map[x][:y] + ' ' + map[x][y + 1:]
+            map[x] = map[x][:y] + '.' + map[x][y + 1:]
             overlap = False
         else:
             map[x] = map[x][:y] + ' ' + map[x][y + 1:]
@@ -92,6 +99,9 @@ def make_move(player, direction, map, position, overlap):
             overlap = True
         map[x_next] = map[x_next][:y_next] + player + map[x_next][y_next + 1:]
         #print(map)
+        # for i in map:
+        #         if i[-1] == ' ' or i[-1] == '\n':
+        #             i = i[:-1]
         return score, map, overlap
         
         
@@ -135,7 +145,7 @@ def transfer_map_to_solution(map, score, count, player, direction):
     solution = str(count) + ': ' + player + ' moving ' + direction + '\n'
     for i in range(len(map)):
         solution += map[i] + '\n'
-    solution += 'score: ' + str(score)
+    solution += 'score: ' + str(score) + '\n'
     return solution
 if __name__ == "__main__":
     test_case_id = int(sys.argv[1])
