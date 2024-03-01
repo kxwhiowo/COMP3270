@@ -17,12 +17,13 @@ def random_play_single_ghost(problem):
     solution = 'seed: ' + str(seed) + '\n0\n'
     for i in world:
         solution += i + '\n'
-
+    print(solution)
     while True:
         position = check_player_position(player_now, world)
         available_directions = check_available(world, position)
         direction = random.choice(available_directions)
         score_new, world, is_overlap = make_move(player_now, direction, world, position, is_overlap)
+        world = check_space(world)
         score += score_new
         counter += 1
         status, winner = check_end_of_game(world)
@@ -103,9 +104,14 @@ def make_move(player, direction, map, position, overlap):
         #         if i[-1] == ' ' or i[-1] == '\n':
         #             i = i[:-1]
         return score, map, overlap
-        
-        
     return 0 
+
+def check_space(map):
+    for i in range(len(map)):
+        if map[i][-1] == ' ':
+            map[i] = map[i][:-1]
+    return map
+    
 def choose_next_position(position, direction):
     x = position[0]
     y = position[1]
