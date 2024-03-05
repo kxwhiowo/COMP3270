@@ -24,6 +24,8 @@ def random_play_multiple_ghosts(problem):
     ghost_list = sorted(check_ghost_list(world))
     solution = 'seed: ' + str(seed) + '\n0\n'
     for i in world:
+        if len(i) == 16:
+            i = i[:-1]
         solution += i + '\n'
         
     while True:

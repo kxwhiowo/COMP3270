@@ -50,8 +50,10 @@ def better_play_single_ghosts(problem):
 def choose_better_direction_for_player(map, available_directions, player_position):
     position_ghost = check_player_position('W', map)
     print(available_directions)
+    # print(available_directions)
     for d in available_directions:
-        closest_distance = dict()
+        #closest_distance = dict()
+        closest_distance = []
         if d == 'N':
             closet = len(map[0]) - 2
             for i in range(player_position[0] - 1, 0, -1):
@@ -59,8 +61,8 @@ def choose_better_direction_for_player(map, available_directions, player_positio
                     break
                 elif map[i][player_position[1]] == '.':
                     closet = player_position[0] - i
-            closet = -closet + abs(position_ghost[0] - (player_position[0] - closet)) + abs(position_ghost[1] - player_position[1])
-            closest_distance[closet] = 'N'
+            closet = -closet + abs(position_ghost[0] - (player_position[0] - 1)) + abs(position_ghost[1] - player_position[1])
+            closest_distance.append((closet, 'N'))
         if d == 'S':
             closet = len(map[0]) - 2
             for i in range(player_position[0] + 1, len(map)):
@@ -68,19 +70,18 @@ def choose_better_direction_for_player(map, available_directions, player_positio
                     break
                 elif map[i][player_position[1]] == '.':
                     closet = - player_position[0] + i
-            closet = -closet + abs(position_ghost[0] - (player_position[0] + closet)) + abs(position_ghost[1] - player_position[1])
-            closest_distance[closet] = 'S'
+            closet = -closet + abs(position_ghost[0] - (player_position[0] + 1)) + abs(position_ghost[1] - player_position[1])
+            closest_distance.append((closet, 'S'))
         if d == 'E':
             closet = len(map[0]) - 2
             for i in range(player_position[1] + 1, len(map[0])):
+                #print(1)
                 if map[player_position[0]][i] == '%':
-                    print(1)
                     break
-                elif map[player_position[0]][i] == '.':
+                if map[player_position[0]][i] == '.':
                     closet = - player_position[1] + i
-            closet = -closet + abs(position_ghost[0] - (player_position[0])) + abs(position_ghost[1] - (player_position[1] + closet))
-            closest_distance[closet] = 'E'
-            
+            closet = -closet + abs(position_ghost[0] - (player_position[0])) + abs(position_ghost[1] - (player_position[1] + 1))
+            closest_distance.append((closet, 'E'))
         if d == 'W':
             closet = len(map[0]) - 2
             for i in range(player_position[1] - 1, 0, -1):
@@ -88,12 +89,14 @@ def choose_better_direction_for_player(map, available_directions, player_positio
                     break
                 elif map[player_position[0]][i] == '.':
                     closet = player_position[1] - i
-            closet = -closet + abs(position_ghost[0] - (player_position[0])) + abs(position_ghost[1] - (player_position[1] - closet))
-            closest_distance[closet] = 'W'
+            closet = -closet + abs(position_ghost[0] - (player_position[0])) + abs(position_ghost[1] - (player_position[1] - 1))
+            closest_distance.append((closet, 'W'))
+    distance = max([i[0] for i in closest_distance])
     print(closest_distance)
-    distance = max(closest_distance.keys())
-    #distance = abs(position_ghost[0] - (player_position[0])) + abs(position_ghost[1] - (player_position[1]))
-    better_direction = closest_distance[distance]
+    better_direction = 'A'
+    for i in closest_distance:
+        if i[0] == distance:
+            better_direction = i[1]
     return better_direction
 
 def choose_direction_for_ghost(map, available_directions):

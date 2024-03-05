@@ -15,9 +15,12 @@ def random_play_single_ghost(problem):
     is_overlap = False
     random.seed(seed, version=1)
     solution = 'seed: ' + str(seed) + '\n0\n'
+    # print(len(world[1]))
+    # world[1] = world[1][:-1]
     for i in world:
+        if len(i) == 16:
+            i = i[:-1]
         solution += i + '\n'
-    print(solution)
     while True:
         position = check_player_position(player_now, world)
         available_directions = check_available(world, position)
@@ -42,7 +45,6 @@ def random_play_single_ghost(problem):
                 player_now = 'P'
     with open('1.txt', 'wt') as f:
         print(solution, file=f)
-    print(world)
     return solution
 
 def check_available(map, position):
