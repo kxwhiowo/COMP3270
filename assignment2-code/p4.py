@@ -1,3 +1,4 @@
+import math
 import sys, parse
 import time, os, copy, random
 
@@ -91,9 +92,9 @@ def choose_better_direction_for_player(map, available_directions, player_positio
                     break
                 elif map[i][player_position[1]] == '.':
                     closest = player_position[0] - i
-            position_ghost = check_nearest_ghost_position(map, (player_position[0] - 1, player_position[1]), ghost_list)
-            closest = -closest + 8 * abs(position_ghost[0] - (player_position[0] - 1)) + 8 * abs(position_ghost[1] - player_position[1])
-            closest_distance.append((closest, 'N'))
+            positions_ghost = check_nearest_ghost_position(map, (player_position[0] - 1, player_position[1]), ghost_list)
+            closest_ = calculate_closest_score((player_position[0] - 1, player_position[1]), positions_ghost, closest)
+            closest_distance.append((closest_, 'N'))
         if d == 'S':
             closest = len(map[0]) - 2
             for i in range(player_position[0] + 1, len(map)):
@@ -101,9 +102,9 @@ def choose_better_direction_for_player(map, available_directions, player_positio
                     break
                 elif map[i][player_position[1]] == '.':
                     closest = - player_position[0] + i
-            position_ghost = check_nearest_ghost_position(map, (player_position[0] + 1, player_position[1]), ghost_list)
-            closest = -closest + 8 * abs(position_ghost[0] - (player_position[0] + 1)) + 8 * abs(position_ghost[1] - player_position[1])
-            closest_distance.append((closest, 'S'))
+            positions_ghost = check_nearest_ghost_position(map, (player_position[0], player_position[1] - 1), ghost_list)
+            closest_ = calculate_closest_score((player_position[0], player_position[1] - 1), positions_ghost, closest)
+            closest_distance.append((closest_, 'S'))
         if d == 'E':
             closest = len(map[0]) - 2
             for i in range(player_position[1] + 1, len(map[0])):
@@ -111,9 +112,9 @@ def choose_better_direction_for_player(map, available_directions, player_positio
                     break
                 if map[player_position[0]][i] == '.':
                     closest = - player_position[1] + i
-            position_ghost = check_nearest_ghost_position(map, (player_position[0], player_position[1] + 1), ghost_list)
-            closest = -closest + 8 * abs(position_ghost[0] - (player_position[0])) + 8 * abs(position_ghost[1] - (player_position[1] + 1))
-            closest_distance.append((closest, 'E'))
+            positions_ghost = check_nearest_ghost_position(map, (player_position[0], player_position[1] + 1), ghost_list)
+            closest_ = calculate_closest_score((player_position[0], player_position[1] + 1), positions_ghost, closest)
+            closest_distance.append((closest_, 'E'))
         if d == 'W':
             closest = len(map[0]) - 2
             for i in range(player_position[1] - 1, 0, -1):
@@ -121,9 +122,9 @@ def choose_better_direction_for_player(map, available_directions, player_positio
                     break
                 elif map[player_position[0]][i] == '.':
                     closest = player_position[1] - i
-            position_ghost = check_nearest_ghost_position(map, (player_position[0], player_position[1] - 1), ghost_list)
-            closest = -closest + 8 * abs(position_ghost[0] - (player_position[0])) + 8 * abs(position_ghost[1] - (player_position[1] - 1))
-            closest_distance.append((closest, 'W'))
+            positions_ghost = check_nearest_ghost_position(map, (player_position[0], player_position[1] - 1), ghost_list)
+            closest_ = calculate_closest_score((player_position[0], player_position[1] - 1), positions_ghost, closest)
+            closest_distance.append((closest_, 'W'))
     distance = max([i[0] for i in closest_distance])
     
     better_direction = 'A'
@@ -143,20 +144,28 @@ def check_available(map, position):
     if map[position[0]][position[1] - 1] != '%':
         directions.append('W')
     return tuple(directions)
-
 def check_nearest_ghost_position(map, player_position, ghost_list):
     ghost_positions = []
     for i in range(len(map)):
         for j in range(len(map[i])):
             if map[i][j] in ghost_list:
                 ghost_positions.append((i, j))
-    k = 0
-    ghost_target = ghost_positions[0]
-    dist = 10000
-    for ghost in ghost_positions:
-        if (ghost[0] - player_position[0]) ** 2 + (ghost[1] - player_position[1]) ** 2 < dist:
-            ghost_target = ghost
-    return ghost_target
+    sorted_points = sorted(ghost_positions, key=lambda p: math.dist(p, player_position), reverse=True)
+    return sorted_points
+def calculate_closest_score(player_position, ghost_position_list, food_distance):
+    player_x, player_y = player_position[0], player_position[1]
+    score = - food_distance
+    weight = 2
+    num_of_ghosts = len(ghost_position_list)
+    for _ in range(len(ghost_position_list)):
+        dist = (abs(player_x - ghost_position_list[_][0]) + abs(player_y - ghost_position_list[_][1]))
+        if dist == 0:
+            score -= 10000
+        else:
+            score += weight * num_of_ghosts * 1/dist
+        weight -= 0.5
+    return score
+
 def check_player_position(player, map):
     position = ()
     for i in range(len(map)):
@@ -164,7 +173,6 @@ def check_player_position(player, map):
             if map[i][j] == player:
                 return (i, j)
     return position    
-
 def make_move(player, direction, map, position, overlap, ghost_list):
     score = 0
     ghost_possible_list = ['W', 'X', 'Y', 'Z']
