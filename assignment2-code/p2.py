@@ -49,50 +49,54 @@ def better_play_single_ghosts(problem):
     
 def choose_better_direction_for_player(map, available_directions, player_position):
     position_ghost = check_player_position('W', map)
-    print(available_directions)
+    # print(available_directions)
+    closest_distance = []
     # print(available_directions)
     for d in available_directions:
-        #closest_distance = dict()
-        closest_distance = []
+        # closest_distance = dict()
+        
         if d == 'N':
-            closet = len(map[0]) - 2
+            closest = len(map[0]) - 2
             for i in range(player_position[0] - 1, 0, -1):
                 if map[i][player_position[1]] == '%':
                     break
                 elif map[i][player_position[1]] == '.':
-                    closet = player_position[0] - i
-            closet = -closet + abs(position_ghost[0] - (player_position[0] - 1)) + abs(position_ghost[1] - player_position[1])
-            closest_distance.append((closet, 'N'))
+                    closest = player_position[0] - i
+            closest = -closest + 5 * abs(position_ghost[0] - (player_position[0] - 1)) + 5 * abs(position_ghost[1] - player_position[1])
+            closest_distance.append((closest, 'N'))
         if d == 'S':
-            closet = len(map[0]) - 2
+            closest = len(map[0]) - 2
             for i in range(player_position[0] + 1, len(map)):
                 if map[i][player_position[1]] == '%':
                     break
                 elif map[i][player_position[1]] == '.':
-                    closet = - player_position[0] + i
-            closet = -closet + abs(position_ghost[0] - (player_position[0] + 1)) + abs(position_ghost[1] - player_position[1])
-            closest_distance.append((closet, 'S'))
+                    closest = - player_position[0] + i
+            closest = -closest + 5 * abs(position_ghost[0] - (player_position[0] + 1)) + 5 * abs(position_ghost[1] - player_position[1])
+            closest_distance.append((closest, 'S'))
         if d == 'E':
-            closet = len(map[0]) - 2
+            closest = len(map[0]) - 2
             for i in range(player_position[1] + 1, len(map[0])):
                 #print(1)
                 if map[player_position[0]][i] == '%':
                     break
                 if map[player_position[0]][i] == '.':
-                    closet = - player_position[1] + i
-            closet = -closet + abs(position_ghost[0] - (player_position[0])) + abs(position_ghost[1] - (player_position[1] + 1))
-            closest_distance.append((closet, 'E'))
+                    closest = - player_position[1] + i
+            closest = -closest + 5 * abs(position_ghost[0] - (player_position[0])) + 5 * abs(position_ghost[1] - (player_position[1] + 1))
+            closest_distance.append((closest, 'E'))
+            # print(closest_distance, closest)
         if d == 'W':
-            closet = len(map[0]) - 2
+            closest = len(map[0]) - 2
             for i in range(player_position[1] - 1, 0, -1):
                 if map[player_position[0]][i] == '%':
                     break
                 elif map[player_position[0]][i] == '.':
-                    closet = player_position[1] - i
-            closet = -closet + abs(position_ghost[0] - (player_position[0])) + abs(position_ghost[1] - (player_position[1] - 1))
-            closest_distance.append((closet, 'W'))
+                    closest = player_position[1] - i
+            closest = -closest + 5 * abs(position_ghost[0] - (player_position[0])) + 5 * abs(position_ghost[1] - (player_position[1] - 1))
+            closest_distance.append((closest, 'W'))
+            # print(closest_distance, closest)
+    # print(closest_distance)
     distance = max([i[0] for i in closest_distance])
-    print(closest_distance)
+    
     better_direction = 'A'
     for i in closest_distance:
         if i[0] == distance:
