@@ -8,17 +8,18 @@ PACMAN_MOVING_SCORE = -1
 
 def better_play_mulitple_ghosts(problem):
     list_of_game = problem.split('\n')
+    seed = int(list_of_game[0].split()[-1])
     world = list_of_game[1:]
     player_now = 'P'
     counter = 0
     score = 0
-    is_overlap = False
     ghost_list = sorted(check_ghost_list(world))
     counter_for_player = 0
     ghost_list.append('P')
     player_list = sorted(ghost_list)
-    print(player_list)
     ghost_list = sorted(check_ghost_list(world))
+    is_overlap = [False for i in ghost_list]
+    solution = 'seed: ' + str(seed) + '\n0\n'
     for i in world:
         solution += i + '\n'
         
@@ -26,19 +27,15 @@ def better_play_mulitple_ghosts(problem):
         position = check_player_position(player_now, world)
         if player_now == 'P':
             available_directions = check_available(world, position)
+            direction = choose_better_direction_for_player(world, available_directions, position, ghost_list)
         else:
             available_directions = check_available_for_ghost(world, position, ghost_list)
-            if len(available_directions) == 0:
-                counter_for_player += 1
-                if counter_for_player == len(player_list):
-                    counter_for_player = 0
-                player_now = player_list[counter_for_player]
-                continue
-        direction = random.choice(available_directions)
+            direction = choose_direction_for_ghost(world, available_directions)
+        
         score_new, world, is_overlap = make_move(player_now, direction, world, position, is_overlap, ghost_list)
         score += score_new
         counter += 1
-        status, winner = check_end_of_game(world)
+        status, winner = check_end_of_game(world, is_overlap)
         if status:
             if winner == 'Pacman':
                 score += PACMAN_WIN_SCORE
@@ -46,6 +43,8 @@ def better_play_mulitple_ghosts(problem):
             solution += 'WIN: ' + winner
             break
         else:
+            if direction == None:
+                direction = ""
             solution += transfer_map_to_solution(world, score, counter, player_now, direction)
             counter_for_player += 1
             if counter_for_player == len(player_list):
@@ -53,9 +52,10 @@ def better_play_mulitple_ghosts(problem):
             player_now = player_list[counter_for_player]
     with open('1.txt', 'wt') as f:
         print(solution, file=f)
-    return solution
+    return solution, winner
 
 def check_ghost_list(map):
+
     ghost_list = []
     for i in range(len(map)):
         for j in range(len(map[i])):
@@ -76,8 +76,61 @@ def check_available_for_ghost(map, position, ghost_list):
     return tuple(directions)
 
 def choose_direction_for_ghost(map, available_directions):
+    if len(available_directions) == 0:
+        return None
     direction = random.choice(available_directions)
     return direction
+
+def choose_better_direction_for_player(map, available_directions, player_position, ghost_list):
+    closest_distance = []
+    for d in available_directions:
+        if d == 'N':
+            closest = len(map[0]) - 2
+            for i in range(player_position[0] - 1, 0, -1):
+                if map[i][player_position[1]] == '%':
+                    break
+                elif map[i][player_position[1]] == '.':
+                    closest = player_position[0] - i
+            position_ghost = check_nearest_ghost_position(map, (player_position[0] - 1, player_position[1]), ghost_list)
+            closest = -closest + 8 * abs(position_ghost[0] - (player_position[0] - 1)) + 8 * abs(position_ghost[1] - player_position[1])
+            closest_distance.append((closest, 'N'))
+        if d == 'S':
+            closest = len(map[0]) - 2
+            for i in range(player_position[0] + 1, len(map)):
+                if map[i][player_position[1]] == '%':
+                    break
+                elif map[i][player_position[1]] == '.':
+                    closest = - player_position[0] + i
+            position_ghost = check_nearest_ghost_position(map, (player_position[0] + 1, player_position[1]), ghost_list)
+            closest = -closest + 8 * abs(position_ghost[0] - (player_position[0] + 1)) + 8 * abs(position_ghost[1] - player_position[1])
+            closest_distance.append((closest, 'S'))
+        if d == 'E':
+            closest = len(map[0]) - 2
+            for i in range(player_position[1] + 1, len(map[0])):
+                if map[player_position[0]][i] == '%':
+                    break
+                if map[player_position[0]][i] == '.':
+                    closest = - player_position[1] + i
+            position_ghost = check_nearest_ghost_position(map, (player_position[0], player_position[1] + 1), ghost_list)
+            closest = -closest + 8 * abs(position_ghost[0] - (player_position[0])) + 8 * abs(position_ghost[1] - (player_position[1] + 1))
+            closest_distance.append((closest, 'E'))
+        if d == 'W':
+            closest = len(map[0]) - 2
+            for i in range(player_position[1] - 1, 0, -1):
+                if map[player_position[0]][i] == '%':
+                    break
+                elif map[player_position[0]][i] == '.':
+                    closest = player_position[1] - i
+            position_ghost = check_nearest_ghost_position(map, (player_position[0], player_position[1] - 1), ghost_list)
+            closest = -closest + 8 * abs(position_ghost[0] - (player_position[0])) + 8 * abs(position_ghost[1] - (player_position[1] - 1))
+            closest_distance.append((closest, 'W'))
+    distance = max([i[0] for i in closest_distance])
+    
+    better_direction = 'A'
+    for i in closest_distance:
+        if i[0] == distance:
+            better_direction = i[1]
+    return better_direction
 
 def check_available(map, position):
     directions = []
@@ -91,14 +144,25 @@ def check_available(map, position):
         directions.append('W')
     return tuple(directions)
 
-
+def check_nearest_ghost_position(map, player_position, ghost_list):
+    ghost_positions = []
+    for i in range(len(map)):
+        for j in range(len(map[i])):
+            if map[i][j] in ghost_list:
+                ghost_positions.append((i, j))
+    k = 0
+    ghost_target = ghost_positions[0]
+    dist = 10000
+    for ghost in ghost_positions:
+        if (ghost[0] - player_position[0]) ** 2 + (ghost[1] - player_position[1]) ** 2 < dist:
+            ghost_target = ghost
+    return ghost_target
 def check_player_position(player, map):
     position = ()
     for i in range(len(map)):
         for j in range(len(map[i])):
             if map[i][j] == player:
                 return (i, j)
-    print(player)
     return position    
 
 def make_move(player, direction, map, position, overlap, ghost_list):
@@ -111,37 +175,32 @@ def make_move(player, direction, map, position, overlap, ghost_list):
             score += EAT_FOOD_SCORE
         elif map[x_next][y_next] in ghost_list:
             map[x] = map[x][:y] + ' ' + map[x][y + 1:]
-            # for i in map:
-            #     if i[-1] == ' ' or i[-1] == '\n':
-            #         i = i[:-1]
             return score + PACMAN_EATEN_SCORE + PACMAN_MOVING_SCORE, map, overlap
         map[x_next] = map[x_next][:y_next] + player + map[x_next][y_next + 1:]
         map[x] = map[x][:y] + ' ' + map[x][y + 1:]
-        #print(map)
-        # for i in map:
-        #         if i[-1] == ' ' or i[-1] == '\n':
-        #             i = i[:-1]
         return score + PACMAN_MOVING_SCORE, map, overlap
     if player != 'P':
+        if direction == None:
+            return score, map, overlap
+        ghost = None
+        for g in range(len(ghost_list)):
+            if ghost_list[g] == player:
+                ghost = g
         x_next, y_next = choose_next_position(position, direction)
         if map[x_next][y_next] == 'P':
             score += PACMAN_EATEN_SCORE
         if map[x_next][y_next] in ghost_possible_list:
             return score, map, overlap
-        if overlap:
+        if overlap[ghost]:
             map[x] = map[x][:y] + '.' + map[x][y + 1:]
-            overlap = False
+            overlap[ghost] = False
         else:
             map[x] = map[x][:y] + ' ' + map[x][y + 1:]
         if map[x_next][y_next] == '.':
-            overlap = True
+            overlap[ghost] = True
         map[x_next] = map[x_next][:y_next] + player + map[x_next][y_next + 1:]
-        #print(map)
-        # for i in map:
-        #         if i[-1] == ' ' or i[-1] == '\n':
-        #             i = i[:-1]
         return score, map, overlap
-        
+
         
     return 0 
 def choose_next_position(position, direction):
@@ -157,10 +216,13 @@ def choose_next_position(position, direction):
         return (x, y - 1)
     
     
-def check_end_of_game(map):
+def check_end_of_game(map, overlap):
     counter_for_player_P = 0
     counter_for_player_W = 0
     counter_for_food = 0
+    exist_overlap = False
+    if True in overlap:
+        exist_overlap = True
     for i in map:
         for j in range(len(i)):
             if i[j] == 'P':
@@ -169,7 +231,7 @@ def check_end_of_game(map):
                 counter_for_player_W += 1
             elif i[j] == '.':
                 counter_for_food += 1
-    if counter_for_food == 0:
+    if counter_for_food == 0 and exist_overlap == False:
         return True, 'Pacman'
     elif (counter_for_player_W + counter_for_player_P) != 2:
         return True, 'Ghost'

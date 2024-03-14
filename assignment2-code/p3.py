@@ -19,7 +19,6 @@ def random_play_multiple_ghosts(problem):
     counter_for_player = 0
     ghost_list.append('P')
     player_list = sorted(ghost_list)
-    # print(player_list)
     ghost_list = sorted(check_ghost_list(world))
     print(ghost_list)
     solution = 'seed: ' + str(seed) + '\n0\n'
