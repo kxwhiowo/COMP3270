@@ -14,15 +14,17 @@ def random_play_multiple_ghosts(problem):
     player_now = 'P'
     counter = 0
     score = 0
-    is_overlap = False
     random.seed(seed, version=1)
     ghost_list = sorted(check_ghost_list(world))
     counter_for_player = 0
     ghost_list.append('P')
     player_list = sorted(ghost_list)
-    print(player_list)
+    # print(player_list)
     ghost_list = sorted(check_ghost_list(world))
+    print(ghost_list)
     solution = 'seed: ' + str(seed) + '\n0\n'
+    is_overlap = [False for i in ghost_list]
+    print(is_overlap)
     for i in world:
         if len(i) == 16:
             i = i[:-1]
@@ -34,17 +36,14 @@ def random_play_multiple_ghosts(problem):
             available_directions = check_available(world, position)
         else:
             available_directions = check_available_for_ghost(world, position, ghost_list)
-            if len(available_directions) == 0:
-                counter_for_player += 1
-                if counter_for_player == len(player_list):
-                    counter_for_player = 0
-                player_now = player_list[counter_for_player]
-                continue
-        direction = random.choice(available_directions)
+        if len(available_directions) == 0:
+            direction = None
+        else:
+            direction = random.choice(available_directions)
         score_new, world, is_overlap = make_move(player_now, direction, world, position, is_overlap, ghost_list)
         score += score_new
         counter += 1
-        status, winner = check_end_of_game(world)
+        status, winner = check_end_of_game(world, is_overlap)
         if status:
             if winner == 'Pacman':
                 score += PACMAN_WIN_SCORE
@@ -52,6 +51,8 @@ def random_play_multiple_ghosts(problem):
             solution += 'WIN: ' + winner
             break
         else:
+            if direction == None:
+                direction = ""
             solution += transfer_map_to_solution(world, score, counter, player_now, direction)
             counter_for_player += 1
             if counter_for_player == len(player_list):
@@ -114,35 +115,30 @@ def make_move(player, direction, map, position, overlap, ghost_list):
             score += EAT_FOOD_SCORE
         elif map[x_next][y_next] in ghost_list:
             map[x] = map[x][:y] + ' ' + map[x][y + 1:]
-            # for i in map:
-            #     if i[-1] == ' ' or i[-1] == '\n':
-            #         i = i[:-1]
             return score + PACMAN_EATEN_SCORE + PACMAN_MOVING_SCORE, map, overlap
         map[x_next] = map[x_next][:y_next] + player + map[x_next][y_next + 1:]
         map[x] = map[x][:y] + ' ' + map[x][y + 1:]
-        #print(map)
-        # for i in map:
-        #         if i[-1] == ' ' or i[-1] == '\n':
-        #             i = i[:-1]
         return score + PACMAN_MOVING_SCORE, map, overlap
     if player != 'P':
+        if direction == None:
+            return score, map, overlap
+        ghost = None
+        for g in range(len(ghost_list)):
+            if ghost_list[g] == player:
+                ghost = g
         x_next, y_next = choose_next_position(position, direction)
         if map[x_next][y_next] == 'P':
             score += PACMAN_EATEN_SCORE
         if map[x_next][y_next] in ghost_possible_list:
             return score, map, overlap
-        if overlap:
+        if overlap[ghost]:
             map[x] = map[x][:y] + '.' + map[x][y + 1:]
-            overlap = False
+            overlap[ghost] = False
         else:
             map[x] = map[x][:y] + ' ' + map[x][y + 1:]
         if map[x_next][y_next] == '.':
-            overlap = True
+            overlap[ghost] = True
         map[x_next] = map[x_next][:y_next] + player + map[x_next][y_next + 1:]
-        #print(map)
-        # for i in map:
-        #         if i[-1] == ' ' or i[-1] == '\n':
-        #             i = i[:-1]
         return score, map, overlap
         
         
@@ -160,10 +156,13 @@ def choose_next_position(position, direction):
         return (x, y - 1)
     
     
-def check_end_of_game(map):
+def check_end_of_game(map, overlap):
     counter_for_player_P = 0
     counter_for_player_W = 0
     counter_for_food = 0
+    exist_overlap = False
+    if True in overlap:
+        exist_overlap = True
     for i in map:
         for j in range(len(i)):
             if i[j] == 'P':
@@ -172,7 +171,7 @@ def check_end_of_game(map):
                 counter_for_player_W += 1
             elif i[j] == '.':
                 counter_for_food += 1
-    if counter_for_food == 0:
+    if counter_for_food == 0 and exist_overlap == False:
         return True, 'Pacman'
     elif (counter_for_player_W + counter_for_player_P) != 2:
         return True, 'Ghost'
