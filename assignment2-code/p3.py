@@ -20,10 +20,8 @@ def random_play_multiple_ghosts(problem):
     ghost_list.append('P')
     player_list = sorted(ghost_list)
     ghost_list = sorted(check_ghost_list(world))
-    print(ghost_list)
     solution = 'seed: ' + str(seed) + '\n0\n'
     is_overlap = [False for i in ghost_list]
-    print(is_overlap)
     for i in world:
         if len(i) == 16:
             i = i[:-1]
@@ -42,7 +40,7 @@ def random_play_multiple_ghosts(problem):
         score_new, world, is_overlap = make_move(player_now, direction, world, position, is_overlap, ghost_list)
         score += score_new
         counter += 1
-        status, winner = check_end_of_game(world, is_overlap)
+        status, winner = check_end_of_game(world, is_overlap, ghost_list)
         if status:
             if winner == 'Pacman':
                 score += PACMAN_WIN_SCORE
@@ -57,8 +55,6 @@ def random_play_multiple_ghosts(problem):
             if counter_for_player == len(player_list):
                 counter_for_player = 0
             player_now = player_list[counter_for_player]
-    with open('1.txt', 'wt') as f:
-        print(solution, file=f)
     return solution
 
 def check_ghost_list(map):
@@ -155,7 +151,7 @@ def choose_next_position(position, direction):
         return (x, y - 1)
     
     
-def check_end_of_game(map, overlap):
+def check_end_of_game(map, overlap, ghost_list):
     counter_for_player_P = 0
     counter_for_player_W = 0
     counter_for_food = 0
@@ -166,13 +162,13 @@ def check_end_of_game(map, overlap):
         for j in range(len(i)):
             if i[j] == 'P':
                counter_for_player_P += 1
-            elif i[j] == 'W':
+            elif i[j] in ghost_list:
                 counter_for_player_W += 1
             elif i[j] == '.':
                 counter_for_food += 1
     if counter_for_food == 0 and exist_overlap == False:
         return True, 'Pacman'
-    elif (counter_for_player_W + counter_for_player_P) != 2:
+    elif (counter_for_player_W + counter_for_player_P) != len(ghost_list) + 1:
         return True, 'Ghost'
     else:
         if counter_for_player_P == 1:
