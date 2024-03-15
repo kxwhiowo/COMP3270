@@ -20,10 +20,8 @@ def random_play_multiple_ghosts(problem):
     ghost_list.append('P')
     player_list = sorted(ghost_list)
     ghost_list = sorted(check_ghost_list(world))
-    print(ghost_list)
     solution = 'seed: ' + str(seed) + '\n0\n'
     is_overlap = [False for i in ghost_list]
-    print(is_overlap)
     for i in world:
         if len(i) == 16:
             i = i[:-1]
@@ -57,8 +55,6 @@ def random_play_multiple_ghosts(problem):
             if counter_for_player == len(player_list):
                 counter_for_player = 0
             player_now = player_list[counter_for_player]
-    with open('1.txt', 'wt') as f:
-        print(solution, file=f)
     return solution
 
 def check_ghost_list(map):
@@ -101,7 +97,6 @@ def check_player_position(player, map):
         for j in range(len(map[i])):
             if map[i][j] == player:
                 return (i, j)
-    print(player)
     return position    
 
 def make_move(player, direction, map, position, overlap, ghost_list):
