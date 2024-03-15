@@ -97,7 +97,6 @@ def check_player_position(player, map):
         for j in range(len(map[i])):
             if map[i][j] == player:
                 return (i, j)
-    print(player)
     return position    
 
 def make_move(player, direction, map, position, overlap, ghost_list):
