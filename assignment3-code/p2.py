@@ -107,8 +107,7 @@ def policy_evaluation(problem):
         experience += render(new_grid)
         grid = new_grid
     
-    with open("1.txt", "wt") as f:
-        print(experience[:-1], file=f)
+
     return experience[:-1]
 
 # translate the moving to positions

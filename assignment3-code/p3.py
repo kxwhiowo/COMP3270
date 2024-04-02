@@ -129,8 +129,6 @@ def value_iteration(problem):
         experience += render(new_grid, policy, _)
         grid = new_grid
     
-    with open("1.txt", "wt") as f:
-        print(experience[:-1], file=f)
     return experience[:-1]
 
 # translate the moving to positions
