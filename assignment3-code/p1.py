@@ -19,7 +19,7 @@ def play_episode(problem):
     global PLAYER_POSITION, START_POSITION
     global SPACE, LEN_SPACE
     global LIVING_REWARD, NOISE
-    global GRID_WIDTH, GRID_HEIGHT
+    global GRID_WIDTH, GRID_HEIGHT, WALL_POSITION
 
     problem_ = problem.split("\n")
     seed_ = int(problem_[0][6:])
@@ -86,9 +86,7 @@ def play_episode(problem):
         experience += render(grid, intend_direction, real_direction, reward, c_score)
         if real_direction == 'exit':
             break
-    
-    with open("1.txt", "wt") as f:
-        print(experience[:-1], file=f)
+    WALL_POSITION = []
     return experience[:-1]
 
 # translate the moving to positions
