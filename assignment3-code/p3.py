@@ -18,7 +18,7 @@ GRID_WIDTH = 0
 def value_iteration(problem):
     global START_POSITION
     global LIVING_REWARD, NOISE, DISCOUNT, ITERATION
-    global GRID_WIDTH, GRID_HEIGHT
+    global GRID_WIDTH, GRID_HEIGHT, WALL_POSITION
 
     problem_ = problem.split("\n")
 
@@ -128,7 +128,7 @@ def value_iteration(problem):
                 policy[i][j] = max_direction
         experience += render(new_grid, policy, _)
         grid = new_grid
-    
+    WALL_POSITION = []
     return experience[:-1]
 
 # translate the moving to positions

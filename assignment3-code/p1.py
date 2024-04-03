@@ -1,25 +1,24 @@
 import sys, grader, parse, random
 from collections import Counter
 
-PLAYER_POSITION = []
-START_POSITION = []
-WALL_POSITION = []
-LIVING_REWARD = 0
-NOISE = 0
 DIRECTIONS = ['N', 'E', 'S', 'W']
 D = {'N':['N', 'E', 'W'], 'E':['E', 'S', 'N'], 'S':['S', 'W', 'E'], 'W':['W', 'N', 'S']}
-SPACE = ""
-LEN_SPACE = 0
 LINE = "-------------------------------------------- \n"
-GRID_HEIGHT = 0
-GRID_WIDTH = 0
-
 
 def play_episode(problem):
     global PLAYER_POSITION, START_POSITION
     global SPACE, LEN_SPACE
     global LIVING_REWARD, NOISE
     global GRID_WIDTH, GRID_HEIGHT, WALL_POSITION
+    PLAYER_POSITION = []
+    START_POSITION = []
+    WALL_POSITION = []
+    LIVING_REWARD = 0
+    SPACE = ""
+    LEN_SPACE = 0
+    NOISE = 0
+    GRID_HEIGHT = 0
+    GRID_WIDTH = 0
 
     problem_ = problem.split("\n")
     seed_ = int(problem_[0][6:])

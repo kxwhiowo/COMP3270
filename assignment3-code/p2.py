@@ -17,6 +17,8 @@ def policy_evaluation(problem):
     global START_POSITION
     global LIVING_REWARD, NOISE, DISCOUNT, ITERATION
     global GRID_WIDTH, GRID_HEIGHT
+    global WALL_POSITION
+    
 
     problem_ = problem.split("\n")
 
@@ -107,7 +109,7 @@ def policy_evaluation(problem):
         experience += render(new_grid)
         grid = new_grid
     
-
+    WALL_POSITION = []
     return experience[:-1]
 
 # translate the moving to positions
