@@ -6,6 +6,7 @@ EAT_FOOD_SCORE = 10
 PACMAN_EATEN_SCORE = -500
 PACMAN_WIN_SCORE = 500
 PACMAN_MOVING_SCORE = -1
+OK_LIST = ['P', '.', ' ']
 
 def better_play_mulitple_ghosts(problem):
     list_of_game = problem.split('\n')
@@ -66,13 +67,14 @@ def check_ghost_list(map):
     
 def check_available_for_ghost(map, position, ghost_list):
     directions = []
-    if map[position[0]][position[1] + 1] != '%' and map[position[0]][position[1] + 1] not in ghost_list:
+    
+    if map[position[0]][position[1] + 1] in OK_LIST:
         directions.append('E')
-    if map[position[0] - 1][position[1]] != '%' and map[position[0] - 1][position[1]] not in ghost_list:
+    if map[position[0] - 1][position[1]] in OK_LIST:
         directions.append('N')
-    if map[position[0] + 1][position[1]] != '%' and map[position[0] + 1][position[1]] not in ghost_list:
+    if map[position[0] + 1][position[1]] in OK_LIST:
         directions.append('S')
-    if map[position[0]][position[1] - 1] != '%' and map[position[0]][position[1] - 1] not in ghost_list:
+    if map[position[0]][position[1] - 1] in OK_LIST:
         directions.append('W')
     return tuple(directions)
 

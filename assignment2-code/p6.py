@@ -108,7 +108,7 @@ def choose_direction_for_ghost(map, available_directions):
 def choose_better_direction_for_player(map, available_directions, player_position, ghost_list, depth):
     return exp_max(available_directions, map, player_position, depth, 'P')
 
-
+# exp_max function, returns a optimal direction
 def exp_max(available_diretions, map, position, depth, player):
     #print('minimax: ', position, player)
     direction_target = None
@@ -132,7 +132,7 @@ def value_calculator(map, depth, player_number, overlap):
         return max_value(map, depth, 0, overlap)
     else:
         return exp_value(map, depth, player_number, overlap)
-
+# the max value in exp_max
 def max_value(map, depth, player_number, overlap):
     value = -100000
     player = PLAYER_LIST[player_number]
@@ -144,7 +144,7 @@ def max_value(map, depth, player_number, overlap):
         new_map, overlap_new = minimax_make_move(map, player_position, d, overlap)
         value = max(value, value_calculator(new_map, depth - 1, 1, overlap_new))
     return value
-
+# compute the expected value
 def exp_value(map, depth, player_number, overlap):
     value = 0
     player = PLAYER_LIST[player_number]
@@ -178,7 +178,7 @@ def check_terminate_state(map, overlap):
         #print(1)
         return True, -10000
     return False, evaluate_func(map)
-
+# evaluate the map's score.
 def evaluate_func(map):
     player_position = check_player_position('P', map)
     if player_position == None:
@@ -237,14 +237,23 @@ def check_available(map, position):
     if map[position[0]][position[1] - 1] != '%':
         directions.append('W')
     return tuple(directions)
+# compute nearest food distance
 def check_nearest_food_position(map, player_position):
     food_positions = []
     for i in range(len(map)):
         for j in range(len(map[i])):
             if map[i][j] == '.':
                 food_positions.append((i, j))
-    sorted_points = sorted(food_positions, key=lambda p: math.dist(p, player_position), reverse=True)
-    return sorted_points
+    value = 100000
+    if len(food_positions) == 0:
+        return 0
+    for points in food_positions:
+        dist = abs(points[0] - player_position[0]) + abs(points[1] - player_position[1])
+        if dist < value:
+            value = dist
+
+    return value
+# compute nearst ghost positions
 def check_nearest_ghost_position(map, player_position, ghost_list):
     ghost_positions = []
     for i in range(len(map)):
@@ -253,28 +262,20 @@ def check_nearest_ghost_position(map, player_position, ghost_list):
                 ghost_positions.append((i, j))
     sorted_points = sorted(ghost_positions, key=lambda p: math.dist(p, player_position), reverse=True)
     return sorted_points
-def calculate_closest_score(player_position, ghost_position_list, food_distances):
+# compute the score now.
+def calculate_closest_score(player_position, ghost_position_list, food_distance):
     player_x, player_y = player_position[0], player_position[1]
     score = 0
-    weight = 3
-    num_of_food = len(food_distances)
-    for _ in range(num_of_food):
-        dist = (abs(player_x - food_distances[_][0]) + abs(player_y - food_distances[_][1]))
-        if dist == 0:
-            score -= 10
-        else:
-            score -= weight * dist
-        weight -= 3/num_of_food
-    weight = 4
+    score = 4 / (food_distance + 0.001) 
     num_of_ghosts = len(ghost_position_list)
-    for _ in range(num_of_ghosts):
-        dist = (abs(player_x - ghost_position_list[_][0]) + abs(player_y - ghost_position_list[_][1]))
-        if dist == 0:
-            score -= 10000
-        else:
-            score += weight * dist
-        weight -= 0.1
-    return score
+    dist = (abs(player_x - ghost_position_list[0][0]) + abs(player_y - ghost_position_list[0][1]))
+    if dist == 0:
+        score -= 10000
+    else:
+        score += 2 / dist
+    if num_of_ghosts == 1:
+        return score
+    return score + 0.5 / (abs(player_x - ghost_position_list[1][0]) + abs(player_y - ghost_position_list[1][1]))
 
 def check_player_position(player, map):
     for i in range(len(map)):
@@ -282,6 +283,7 @@ def check_player_position(player, map):
             if map[i][j] == player:
                 return (i, j)
     return None  
+# make changes to the map.
 def make_move(player, direction, map, position, overlap, ghost_list):
     global FOOD_NUMBER
     score = 0
@@ -349,7 +351,6 @@ def check_end_of_game(map, overlap):
             return False, 'Pacman' 
         else:
             return False, 'Ghost'
-
 def transfer_map_to_solution(map, score, count, player, direction):
     solution = str(count) + ': ' + player + ' moving ' + direction + '\n'
     for i in range(len(map)):
