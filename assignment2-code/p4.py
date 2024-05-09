@@ -6,6 +6,7 @@ EAT_FOOD_SCORE = 10
 PACMAN_EATEN_SCORE = -500
 PACMAN_WIN_SCORE = 500
 PACMAN_MOVING_SCORE = -1
+OK_LIST = ['P', '.', ' ']
 
 def better_play_mulitple_ghosts(problem):
     list_of_game = problem.split('\n')
@@ -36,7 +37,7 @@ def better_play_mulitple_ghosts(problem):
         score_new, world, is_overlap = make_move(player_now, direction, world, position, is_overlap, ghost_list)
         score += score_new
         counter += 1
-        status, winner = check_end_of_game(world, is_overlap)
+        status, winner = check_end_of_game(world, is_overlap, ghost_list)
         if status:
             if winner == 'Pacman':
                 score += PACMAN_WIN_SCORE
@@ -66,13 +67,14 @@ def check_ghost_list(map):
     
 def check_available_for_ghost(map, position, ghost_list):
     directions = []
-    if map[position[0]][position[1] + 1] != '%' and map[position[0]][position[1] + 1] not in ghost_list:
+    
+    if map[position[0]][position[1] + 1] in OK_LIST:
         directions.append('E')
-    if map[position[0] - 1][position[1]] != '%' and map[position[0] - 1][position[1]] not in ghost_list:
+    if map[position[0] - 1][position[1]] in OK_LIST:
         directions.append('N')
-    if map[position[0] + 1][position[1]] != '%' and map[position[0] + 1][position[1]] not in ghost_list:
+    if map[position[0] + 1][position[1]] in OK_LIST:
         directions.append('S')
-    if map[position[0]][position[1] - 1] != '%' and map[position[0]][position[1] - 1] not in ghost_list:
+    if map[position[0]][position[1] - 1] in OK_LIST:
         directions.append('W')
     return tuple(directions)
 
@@ -224,7 +226,7 @@ def choose_next_position(position, direction):
         return (x, y - 1)
     
     
-def check_end_of_game(map, overlap):
+def check_end_of_game(map, overlap, ghost_list):
     counter_for_player_P = 0
     counter_for_player_W = 0
     counter_for_food = 0
@@ -235,13 +237,13 @@ def check_end_of_game(map, overlap):
         for j in range(len(i)):
             if i[j] == 'P':
                counter_for_player_P += 1
-            elif i[j] == 'W':
+            elif i[j] in ghost_list:
                 counter_for_player_W += 1
             elif i[j] == '.':
                 counter_for_food += 1
     if counter_for_food == 0 and exist_overlap == False:
         return True, 'Pacman'
-    elif (counter_for_player_W + counter_for_player_P) != 2:
+    elif (counter_for_player_W + counter_for_player_P) != len(ghost_list) + 1:
         return True, 'Ghost'
     else:
         if counter_for_player_P == 1:
